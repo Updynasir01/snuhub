@@ -18,10 +18,38 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get article by ID
-router.get('/:id', verifyToken, async (req, res) => {
+// Get featured articles for public landing page (no auth required)
+router.get('/featured', async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id);
+    const articles = await Article.find({ status: 'published' })
+      .populate('author', 'name') // Populate author's name
+      .sort({ createdAt: -1 })
+      .limit(3); // Limit to 3 for featured articles
+
+    res.json(articles);
+  } catch (error) {
+    console.error('Error getting featured articles:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all public articles
+router.get('/public', async (req, res) => {
+  try {
+    const articles = await Article.find({ status: 'published' })
+      .populate('author', 'name')
+      .sort({ createdAt: -1 });
+    res.json(articles);
+  } catch (error) {
+    console.error('Error getting all public articles:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get article by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id).populate('author', 'name');
     if (!article) {
       return res.status(404).json({ message: 'Article not found' });
     }
@@ -89,21 +117,6 @@ router.delete('/:id', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error deleting article:', error);
     res.status(500).json({ message: error.message });
-  }
-});
-
-// Get featured articles for public landing page (no auth required)
-router.get('/featured', async (req, res) => {
-  try {
-    const articles = await Article.find({ status: 'published' })
-      .populate('author', 'name') // Populate author's name
-      .sort({ createdAt: -1 })
-      .limit(3); // Limit to 3 for featured articles
-
-    res.json(articles);
-  } catch (error) {
-    console.error('Error getting featured articles:', error);
-    res.status(500).json({ message: 'Server error' });
   }
 });
 

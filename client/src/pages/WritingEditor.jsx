@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 export default function WritingEditor() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [image, setImage] = useState('');
+  const [tags, setTags] = useState('');
   const [status, setStatus] = useState('draft');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,11 +33,33 @@ export default function WritingEditor() {
       setTitle(article.title);
       setContent(article.content);
       setStatus(article.status);
+      setImage(article.image || '');
+      setTags(article.tags ? article.tags.join(', ') : '');
     } catch (error) {
       setError('Failed to fetch article');
       console.error('Error fetching article:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setImage(response.data.url);
+    } catch (error) {
+      setError('Failed to upload image.');
+      console.error('Error uploading image:', error);
     }
   };
 
@@ -45,7 +69,9 @@ export default function WritingEditor() {
       const articleData = {
         title,
         content,
-        status
+        status,
+        image,
+        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
       };
 
       if (articleId) {
@@ -102,8 +128,21 @@ export default function WritingEditor() {
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
+        </div>
+
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+            Featured Image
+          </label>
+          <input
+            type="file"
+            id="image"
+            onChange={handleImageUpload}
+            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          {image && <img src={image} alt="Preview" className="mt-4 rounded-md max-h-60 w-auto" />}
         </div>
 
         <div>
@@ -120,6 +159,20 @@ export default function WritingEditor() {
         </div>
 
         <div>
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+            Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            id="tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="e.g., technology, science, health"
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          />
+        </div>
+
+        <div>
           <label htmlFor="status" className="block text-sm font-medium text-gray-700">
             Status
           </label>
@@ -127,7 +180,7 @@ export default function WritingEditor() {
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>

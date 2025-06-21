@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { PencilSquareIcon, NewspaperIcon, UserGroupIcon, ChartBarIcon, ArrowSmRightIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, NewspaperIcon, UserGroupIcon, ChartBarIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 const FEATURES = [
   {
@@ -139,12 +139,20 @@ export default function LandingPage() {
                     className="mt-4 inline-flex items-center text-accent font-semibold text-sm hover:underline"
                   >
                     Read more
-                    <ArrowSmRightIcon className="ml-1 h-4 w-4" />
+                    <ArrowRightIcon className="ml-1 h-4 w-4" />
                   </Link>
                 </div>
               </div>
             ))
           )}
+        </div>
+        <div className="text-center mt-12">
+          <Link
+            to="/articles"
+            className="inline-block px-8 py-3 rounded-full bg-accent text-white font-bold shadow-lg hover:bg-accent-light transition-colors text-lg"
+          >
+            View All Articles
+          </Link>
         </div>
       </div>
     </div>
