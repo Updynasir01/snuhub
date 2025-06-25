@@ -1,19 +1,34 @@
 const express = require('express');
 const User = require('../models/User');
+const Article = require('../models/Article');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Get current user profile
 router.get('/me', verifyToken, async (req, res) => {
   try {
-    // Return user info from the token
-    res.json({
-      uid: req.user.uid,
-      email: req.user.email,
-      role: req.user.role || 'student' // Default role is student
-    });
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get public user profile
+router.get('/profile/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const articles = await Article.find({ author: user._id, status: 'published' })
+      .sort({ createdAt: -1 });
+    res.json({ user, articles });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -40,17 +55,6 @@ router.get('/', verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// Admin: Edit a student
-router.patch('/:id', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { name, email }, { new: true }).select('-password');
-    res.json(user);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
 // Admin: Delete a student
 router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
   try {
@@ -70,6 +74,28 @@ router.post('/:id/reset-password', verifyToken, isAdmin, async (req, res) => {
     user.password = password;
     await user.save();
     res.json({ message: 'Password reset' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update user profile (self or admin)
+router.patch('/:id', verifyToken, async (req, res) => {
+  // Allow user to update their own profile, or admin to update any profile
+  if ((req.user._id !== req.params.id && req.user.id !== req.params.id) && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Not authorized' });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    ).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

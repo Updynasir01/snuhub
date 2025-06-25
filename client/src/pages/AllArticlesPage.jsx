@@ -36,6 +36,15 @@ export default function AllArticlesPage() {
     return acc;
   }, {});
 
+  // Helper to get the first line or snippet from HTML content
+  function getExcerpt(html) {
+    if (!html) return '';
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const text = div.textContent || div.innerText || '';
+    return text.split('\n')[0].slice(0, 120) + (text.length > 120 ? '...' : '');
+  }
+
   if (loading) {
     return <div className="text-center py-20">Loading articles...</div>;
   }
@@ -65,9 +74,23 @@ export default function AllArticlesPage() {
                         <span className="inline-block bg-accent/10 text-accent font-bold text-xs px-3 py-1 rounded-full mb-2 w-fit">{article.status || 'Published'}</span>
                         <Link to={`/articles/${article._id}`} className="block">
                             <h3 className="font-serif text-lg font-bold text-primary mb-2 hover:text-accent transition-colors">{article.title}</h3>
+                            <p className="text-primary-dark text-sm mb-2">{getExcerpt(article.content)}</p>
                         </Link>
                         {article.author && (
-                          <p className="text-sm text-gray-600">By {article.author.name}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {article.author.profilePicture && (
+                              <Link to={`/profile/${article.author._id}`}>
+                                <img
+                                  src={article.author.profilePicture}
+                                  alt={article.author.name}
+                                  className="h-6 w-6 rounded-full object-cover border"
+                                />
+                              </Link>
+                            )}
+                            <Link to={`/profile/${article.author._id}`} className="hover:underline">
+                              By {article.author.name}
+                            </Link>
+                          </div>
                         )}
                       </div>
                       <Link

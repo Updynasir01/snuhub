@@ -22,7 +22,7 @@ router.post('/', verifyToken, async (req, res) => {
 router.get('/featured', async (req, res) => {
   try {
     const articles = await Article.find({ status: 'published' })
-      .populate('author', 'name') // Populate author's name
+      .populate('author', 'name profilePicture') // Populate author's name and profile picture
       .sort({ createdAt: -1 })
       .limit(3); // Limit to 3 for featured articles
 
@@ -37,7 +37,7 @@ router.get('/featured', async (req, res) => {
 router.get('/public', async (req, res) => {
   try {
     const articles = await Article.find({ status: 'published' })
-      .populate('author', 'name')
+      .populate('author', 'name profilePicture')
       .sort({ createdAt: -1 });
     res.json(articles);
   } catch (error) {
@@ -49,7 +49,7 @@ router.get('/public', async (req, res) => {
 // Get article by ID
 router.get('/:id', async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id).populate('author', 'name');
+    const article = await Article.findById(req.params.id).populate('author', 'name profilePicture');
     if (!article) {
       return res.status(404).json({ message: 'Article not found' });
     }

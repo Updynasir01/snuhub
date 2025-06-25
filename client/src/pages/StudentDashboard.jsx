@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import ProfileEditor from '../components/ProfileEditor';
 
 export default function StudentDashboard() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -63,6 +64,7 @@ export default function StudentDashboard() {
           </table>
         )}
       </div>
+      <ProfileEditor />
     </div>
   );
 } 

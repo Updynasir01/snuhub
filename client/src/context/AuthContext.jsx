@@ -20,66 +20,43 @@ export function AuthProvider({ children }) {
     }
   };
 
-  async function login(email, password) {
-    try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setAuthToken(token);
-      setCurrentUser(user);
-      return user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async function signup(email, password, name = '') {
-    try {
-      const response = await axios.post('/api/auth/register', { email, password, name });
-      // Auto-login after successful signup
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setAuthToken(token);
-      setCurrentUser(user);
-      return user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem('token');
-    setAuthToken(null);
-    setCurrentUser(null);
-  }
-
   useEffect(() => {
-    // On mount, check for token and fetch user profile
     const token = localStorage.getItem('token');
     if (token) {
-      setAuthToken(token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       axios.get('/api/users/me')
-        .then((response) => {
-          setCurrentUser(response.data);
-        })
+        .then(res => setCurrentUser(res.data))
         .catch(() => {
-          logout();
+          localStorage.removeItem('token');
+          delete axios.defaults.headers.common['Authorization'];
         })
-        .finally(() => {
-          setLoading(false);
-        });
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-    // eslint-disable-next-line
   }, []);
+
+  const login = async (email, password) => {
+    const response = await axios.post('/api/auth/login', { email, password });
+    const { token, user } = response.data;
+    localStorage.setItem('token', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setCurrentUser(user);
+    return user;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    setCurrentUser(null);
+  };
 
   const value = {
     currentUser,
+    setCurrentUser,
     login,
-    signup,
     logout,
-    loading
+    loading,
   };
 
   return (

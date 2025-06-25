@@ -12,6 +12,7 @@ import WritingEditor from './pages/WritingEditor';
 import AboutPage from './pages/AboutPage';
 import ArticlePage from './pages/ArticlePage';
 import AllArticlesPage from './pages/AllArticlesPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const location = useLocation();
@@ -52,6 +53,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/articles/:id" element={<ArticlePage />} />
           <Route path="/articles" element={<AllArticlesPage />} />
+          <Route path="/profile/:id" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

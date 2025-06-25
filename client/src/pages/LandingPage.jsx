@@ -53,6 +53,15 @@ export default function LandingPage() {
     fetchArticles();
   }, []);
 
+  // Helper to get the first line or snippet from HTML content
+  function getExcerpt(html) {
+    if (!html) return '';
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const text = div.textContent || div.innerText || '';
+    return text.split('\n')[0].slice(0, 120) + (text.length > 120 ? '...' : '');
+  }
+
   return (
     <div className="min-h-screen bg-[#f6faff]">
       {/* Hero Section */}
@@ -130,8 +139,22 @@ export default function LandingPage() {
                   <div>
                     <span className="inline-block bg-accent/10 text-accent font-bold text-xs px-3 py-1 rounded-full mb-2 w-fit">{article.status || 'Published'}</span>
                     <h3 className="font-serif text-lg font-bold text-primary mb-2">{article.title}</h3>
+                    <p className="text-primary-dark text-sm mb-2">{getExcerpt(article.content)}</p>
                     {article.author && (
-                      <p className="text-sm text-gray-600">By {article.author.name}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        {article.author.profilePicture && (
+                          <Link to={`/profile/${article.author._id}`}>
+                            <img
+                              src={article.author.profilePicture}
+                              alt={article.author.name}
+                              className="h-6 w-6 rounded-full object-cover border"
+                            />
+                          </Link>
+                        )}
+                        <Link to={`/profile/${article.author._id}`} className="hover:underline">
+                          By {article.author.name}
+                        </Link>
+                      </div>
                     )}
                   </div>
                   <Link

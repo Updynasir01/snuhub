@@ -6,7 +6,19 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'student'], default: 'student' },
   name: { type: String },
+  profilePicture: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  year: { type: String, default: '' },
+  faculty: { type: String, default: '' },
+  awards: [{
+    title: String,
+    year: String,
+    description: String,
+  }],
   createdAt: { type: Date, default: Date.now }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
 });
 
 // Hash password before saving

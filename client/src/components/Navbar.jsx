@@ -31,7 +31,7 @@ export default function Navbar() {
             <Link to="/" className="text-2xl font-serif font-bold text-primary tracking-tight">
               JournoHub
             </Link>
-            <span className="ml-2 px-2 py-0.5 rounded bg-accent-light text-xs font-semibold text-accent uppercase hidden sm:inline">Student Edition</span>
+            {/* <span className="ml-2 px-2 py-0.5 rounded bg-accent-light text-xs font-semibold text-accent uppercase hidden sm:inline">Student Edition</span> */}
           </div>
 
           {/* Navigation */}
